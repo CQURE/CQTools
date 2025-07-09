@@ -22,11 +22,12 @@ So stay tuned — this is just the beginning. **Enjoy!**
 * Forensics
 * Threat Hunting
 
+
 ### Contact Us (and some important stuff):
 
 At CQURE we praise experience and good communication. 
 Effective communication and teamwork are at the heart of our approach. 
-**We believe in transparent and collaborative interactions with the community. **
+We believe in transparent and collaborative interactions with the community. 
 This approach not only builds trust but also ensures that our actions are with pure community support in mind. 
 If you notice something you do not like - JUST SAY IT and contact us at: info (at) cqure.pl. If you have something nice to say - it's even better :) 
 
