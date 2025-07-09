@@ -1,5 +1,6 @@
-**Introduction to CQTools:**
+# CQTools
 
+### Description
 At CQURE, our passion for cybersecurity goes hand in hand with innovation. Over the years, we’ve developed a comprehensive suite of internal tools – forged in the heat of penetration testing engagements, incident response cases, and fueled by our own deep-dive research. These tools aren’t just theoretical – they were born out of real-world challenges we encountered during projects.
 Each tool usually starts as a tiny spark – an idea mid-project – and then the research begins. Sometimes it takes days. Sometimes, years. But the result? A powerful toolkit built to actually get the job done.
 
@@ -16,7 +17,12 @@ We’ve created hundreds of tools over the years (yep), and while some remain in
 
 So stay tuned — this is just the beginning. **Enjoy!** 
 
-**Contact Us (and some important stuff):**
+### Categories
+* Offensive Security
+* Forensics
+* Threat Hunting
+
+### Contact Us (and some important stuff):**
 
 At CQURE we praise experience and good communication. 
 Effective communication and teamwork are at the heart of our approach. 
