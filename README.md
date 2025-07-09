@@ -19,7 +19,7 @@ So stay tuned — this is just the beginning. **Enjoy!**
 
 ### Categories
 * Offensive Security
-* Forensics
+* Forensics - https://github.com/CQURE/CQTools/tree/main/Forensic
 * Threat Hunting
 
 
