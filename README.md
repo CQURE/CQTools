@@ -22,7 +22,7 @@ So stay tuned — this is just the beginning. **Enjoy!**
 * Forensics
 * Threat Hunting
 
-### Contact Us (and some important stuff):**
+### Contact Us (and some important stuff):
 
 At CQURE we praise experience and good communication. 
 Effective communication and teamwork are at the heart of our approach. 
