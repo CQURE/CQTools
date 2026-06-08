@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Custom SOC indicator - example",
+    "patterns": ["customtool.exe", "internal_dropper.dll", "client_specific_loader.exe"],
+    "severity": "high",
+    "category": "custom",
+    "description": "Sample user rule. Replace patterns with your own IOCs (binary names, loader names, etc.). All patterns matched case-insensitively against reconstructed path.",
+    "references": ["https://internal.example.com/ioc-feed"]
+  },
+  {
+    "name": "Dual-use admin tools (extended)",
+    "patterns": ["plink.exe", "putty.exe", "winscp.exe", "rclone.exe"],
+    "severity": "medium",
+    "category": "lateral_movement",
+    "description": "SSH / SCP / rclone clients. Legit admin tools but commonly abused for data staging and exfil.",
+    "references": ["https://attack.mitre.org/techniques/T1048/"]
+  },
+  {
+    "name": "Suspicious filenames in user-writable paths",
+    "patterns": ["update.exe", "svchost_.exe", "winlogon.exe", "lsm.exe"],
+    "severity": "high",
+    "category": "masquerading",
+    "description": "Names that mimic legitimate Windows binaries (svchost.exe, winlogon.exe). Without parent context impossible to filter automatically, but combined with --baseline excluding C:\\Windows\\System32\\ this becomes a strong signal.",
+    "references": ["https://attack.mitre.org/techniques/T1036/"]
+  }
+]

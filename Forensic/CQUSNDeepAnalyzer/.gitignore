@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Node (only for tools/)
+node_modules/
+package-lock.json
+
+# Generated outputs
+output/
+*.html
+!examples/*.html
+*.jsonl
+!examples/*.jsonl
+*.csv
+!examples/*.csv
+
+# Local screenshots / probe artifacts
+shot_*.png
+probe_*.html
+
+# Local user configuration overrides
+local_baseline.txt
+local_rules.json

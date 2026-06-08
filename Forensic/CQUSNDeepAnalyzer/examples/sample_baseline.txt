@@ -1,0 +1,25 @@
+# CQUSNDeepAnalyzer custom baseline patterns
+#
+# Each non-comment / non-empty line is one substring matched case-insensitive
+# against the file's reconstructed path. A matching path is excluded from the
+# timestomping detector (and YARA-lite rule matching).
+#
+# The built-in baseline already covers Windows Update / WinSxS / .NET /
+# Defender / WindowsApps / Program Files Microsoft. This file is for
+# environment-specific additions.
+#
+# Example: ignore noise from your enterprise tools
+
+# User-specific noise
+$recycle.bin\
+windows\fonts\
+
+# Specific 3rd-party software footprint (uncomment as needed)
+# program files\notepad++\
+# program files\7-zip\
+# program files\google\chrome\
+# program files (x86)\mozilla firefox\
+
+# CI / build artifacts
+# users\jenkins\
+# build_output\

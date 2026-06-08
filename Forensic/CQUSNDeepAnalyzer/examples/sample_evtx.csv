@@ -1,0 +1,10 @@
+TimeCreated,EventId,Provider,Channel,UserName,ExecutableInfo,Payload,SourceFile
+2020-09-25T11:21:30.000000+00:00,4688,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Administrator,powershell.exe,Process Create: powershell.exe -enc <base64>,Security.evtx
+2020-09-25T11:21:45.000000+00:00,4624,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Administrator,,An account was successfully logged on,Security.evtx
+2020-09-25T11:22:00.000000+00:00,4688,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Administrator,minergate-cli.exe,Process Create: C:\minergate17\minergate-cli.exe,Security.evtx
+2020-09-25T11:22:30.000000+00:00,1102,Microsoft-Windows-Eventlog,Security,DESKTOP\Administrator,,"The audit log was cleared by user DESKTOP\Administrator",Security.evtx
+2020-09-25T11:23:00.000000+00:00,7045,Service Control Manager,System,DESKTOP\Administrator,C:\Windows\System32\sc.exe,"Service Name: EvilSvc ServicePath: cmd.exe /c calc.exe ServiceType: kernel mode driver",System.evtx
+2020-09-25T11:23:30.000000+00:00,4720,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Administrator,,A user account was created. NewAccount: newuser,Security.evtx
+2020-09-25T11:24:00.000000+00:00,4732,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Administrator,,A member was added to a security-enabled local group. Group: Administrators,Security.evtx
+2020-09-25T10:30:00.000000+00:00,4688,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Misio1,explorer.exe,Process Create: explorer.exe (background context),Security.evtx
+2020-09-25T08:15:00.000000+00:00,4624,Microsoft-Windows-Security-Auditing,Security,DESKTOP\Misio1,,Console logon by Misio1,Security.evtx
