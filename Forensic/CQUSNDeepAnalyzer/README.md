@@ -2,7 +2,7 @@
 
 `CQUSNDeepAnalyzer` is a single-file forensic CLI tool written in pure Python (stdlib only + Plotly for charts) that parses raw NTFS artifacts and generates a rich, interactive HTML report with behavioral analysis and event attribution.
 
-**CQURE / Paula Januszkiewicz · Apache License 2.0**
+**CQURE / Paula Januszkiewicz · Apache License 2.0** |
 **CQURE / Marcin Kozłowski · Apache License 2.0**
 
 ## Inputs
