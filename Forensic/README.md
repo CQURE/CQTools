@@ -39,3 +39,24 @@ CQAppIDResolver – resolve AppIDs from live process or window handles
 CQAppIDCalc – calculate AppID values from application names or executable paths
 CQAutoDest2XML – extract .automaticDestinations-ms data to XML and generate summary reports
 CQAutomaticJumpListSampleCS – proof-of-concept WinForms app to register, manipulate, and spoof Jump Lists for research purposes
+
+## CQURE NTFS / USN Journal Toolkit
+The CQURE NTFS / USN Journal Toolkit focuses on deep analysis of NTFS change activity, reconstructing what happened on a file system from raw forensic artifacts. It parses the USN Change Journal together with the MFT and optional event log data to build a behavioral timeline with event attribution, instead of a flat list of records.
+
+### What can be done with these tools?
+1. Parse the raw `$UsnJrnl:$J` change stream (who/what/when on the file system)
+2. Enrich records with full paths, SI/FN timestamps, ADS and MOTW data from a raw `$MFT`
+3. Correlate file system activity with EVTX events (logon, process create, audit clear, service install, user create)
+4. Detect behavioral patterns: bursts, mass rename/delete, ransomware extensions, suspicious staging
+5. Detect timestomping (`$SI < $FN`, zeroed sub-second values) and suspicious alternate data streams
+6. Generate a rich interactive HTML report plus CSV, JSON and Plaso/Timesketch JSONL super-timeline
+
+### Why is this useful?
+Reconstructs file system activity timelines for incident response and forensic investigations, links them to event log evidence, and surfaces attacker behavior (staging, mass encryption, anti-forensics) that a raw record dump would hide.
+
+### Tools Included
+CQUSNDeepAnalyzer – single-file pure-Python CLI (stdlib + Plotly) that parses raw NTFS artifacts and produces an interactive HTML report with behavioral analysis and event attribution
+
+### Change Log
+New Tools:
+CQUSNDeepAnalyzer – deep USN Journal / MFT / EVTX analyzer with behavioral detectors and interactive reporting
