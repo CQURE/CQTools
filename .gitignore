@@ -1,0 +1,86 @@
+# ==========================================================================
+# CQTools - .gitignore
+# Public repository with a collection of tools. We keep only the essential
+# source files here; build artifacts, secrets, and local files are excluded.
+# ==========================================================================
+
+# --- Secrets and local configuration ------------------------------------
+# NEVER commit sensitive data to a public repo.
+.env
+.env.*
+!.env.example
+*.local
+secrets.*
+*.key
+*.pem
+*.pfx
+credentials.json
+appsettings.*.json
+!appsettings.example.json
+
+# --- Operating system ----------------------------------------------------
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+# Linux
+*~
+.directory
+.Trash-*
+
+# --- Editors and IDEs ----------------------------------------------------
+.vs/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*.suo
+*.user
+*.sln.docstates
+*.code-workspace
+
+# --- Logs and temporary files -------------------------------------------
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+*.old
+tmp/
+temp/
+
+# --- Python --------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+*.pyc
+
+# --- .NET / C# -----------------------------------------------------------
+obj/
+*.pdb
+*.cache
+TestResults/
