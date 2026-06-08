@@ -123,4 +123,4 @@ node tools/probe_report.js report.html
 # Checks: Plotly.newPlot calls, JS errors, DOM stats, table vt rendered rows
 ```
 
-Full documentation: `README.md`, change history: `TODO.md`.
+Full documentation: `README.md`.

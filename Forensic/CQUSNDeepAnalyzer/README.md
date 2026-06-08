@@ -211,7 +211,7 @@ A single module, ~4 kLOC, pure Python stdlib. The HTML report embeds Plotly.min.
 - The parser is corruption-tolerant: sparse `$J` streams (typical for acquisition artifacts) resynchronize after 8 bytes. It never aborts parsing.
 - The first 16 `$MFT` entries (NTFS-reserved: `$MFT`, `$LogFile`, `.`, etc.) are filtered out of findings so they do not pollute the timestomping/ADS signals.
 
-## Roadmap (still to do)
+## Roadmap
 
 - Full binary Prefetch parser (`.pf`) with Xpress Huffman decompression for Win10/11 → run timestamps + loaded DLLs
 - Amcache parser (`Amcache.hve`) → a third independent route to execution evidence
@@ -219,5 +219,3 @@ A single module, ~4 kLOC, pure Python stdlib. The HTML report embeds Plotly.min.
 - Streaming USN parser for journals `>2 GB`
 - `$LogFile` parser (NTFS transactional log, finer-grained than USN)
 - Sigma rules engine (instead of / alongside YARA-lite)
-
-Full change history: `TODO.md` sections 5.1-5.18.
