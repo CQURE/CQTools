@@ -18,7 +18,7 @@ We’ve created hundreds of tools over the years (yep), and while some remain in
 So stay tuned — this is just the beginning. **Enjoy!** 
 
 ### Categories
-* Offensive Security
+* Offensive Security - https://github.com/CQURE/CQTools/tree/main/OffensiveSecurity
 * Forensics - https://github.com/CQURE/CQTools/tree/main/Forensic
 * Threat Hunting
 
