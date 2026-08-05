@@ -1,0 +1,511 @@
+<title>CVE-2026-54121: CertiGhost Attack Chain</title>
+<style>
+  @font-face {
+    font-family: 'Mono';
+    src: local('Cascadia Code'), local('JetBrains Mono'), local('Fira Code'), local('Consolas'), local('monospace');
+  }
+
+  :root {
+    --bg: #0f1117;
+    --bg-raised: #181b24;
+    --bg-panel: #1e2230;
+    --border: #2a2f3e;
+    --border-accent: #3d4560;
+    --text: #c8cdd8;
+    --text-dim: #7a8194;
+    --text-bright: #e8ecf4;
+    --accent: #4e7cff;
+    --accent-dim: #3a5cbf;
+    --red: #e05252;
+    --red-dim: rgba(224,82,82,0.12);
+    --green: #3dba6c;
+    --green-dim: rgba(61,186,108,0.10);
+    --amber: #e0a030;
+    --amber-dim: rgba(224,160,48,0.10);
+    --cyan: #40b8d0;
+    --purple: #9878d0;
+    --kali-green: #50c060;
+    --dc-blue: #5888d8;
+    --ca-amber: #d0a040;
+    --arrow-red: #d05050;
+    --arrow-blue: #5080d0;
+  }
+
+  :root[data-theme="light"] {
+    --bg: #f5f6f8;
+    --bg-raised: #ffffff;
+    --bg-panel: #eef0f4;
+    --border: #d0d4de;
+    --border-accent: #b0b8c8;
+    --text: #2e3444;
+    --text-dim: #6a7080;
+    --text-bright: #1a1e28;
+    --accent: #3a64d8;
+    --accent-dim: #5a80e0;
+    --red: #c83838;
+    --red-dim: rgba(200,56,56,0.08);
+    --green: #2a8a50;
+    --green-dim: rgba(42,138,80,0.07);
+    --amber: #b08020;
+    --amber-dim: rgba(176,128,32,0.07);
+    --cyan: #2090a8;
+    --purple: #7058b0;
+    --kali-green: #2a8a50;
+    --dc-blue: #3868b8;
+    --ca-amber: #a07820;
+    --arrow-red: #c04040;
+    --arrow-blue: #3868b8;
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #f5f6f8;
+      --bg-raised: #ffffff;
+      --bg-panel: #eef0f4;
+      --border: #d0d4de;
+      --border-accent: #b0b8c8;
+      --text: #2e3444;
+      --text-dim: #6a7080;
+      --text-bright: #1a1e28;
+      --accent: #3a64d8;
+      --accent-dim: #5a80e0;
+      --red: #c83838;
+      --red-dim: rgba(200,56,56,0.08);
+      --green: #2a8a50;
+      --green-dim: rgba(42,138,80,0.07);
+      --amber: #b08020;
+      --amber-dim: rgba(176,128,32,0.07);
+      --cyan: #2090a8;
+      --purple: #7058b0;
+      --kali-green: #2a8a50;
+      --dc-blue: #3868b8;
+      --ca-amber: #a07820;
+      --arrow-red: #c04040;
+      --arrow-blue: #3868b8;
+    }
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Mono', 'Cascadia Code', 'JetBrains Mono', monospace;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+    padding: 32px 24px;
+    max-width: 920px;
+    margin: 0 auto;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .header h1 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-bright);
+    letter-spacing: 0.02em;
+    margin-bottom: 4px;
+  }
+
+  .header .subtitle {
+    font-size: 12px;
+    color: var(--text-dim);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .actors {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  .actor-chip {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 4px 14px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+    background: var(--bg-raised);
+  }
+
+  .actor-chip.attacker { border-color: var(--kali-green); color: var(--kali-green); }
+  .actor-chip.dc { border-color: var(--dc-blue); color: var(--dc-blue); }
+  .actor-chip.ca { border-color: var(--ca-amber); color: var(--ca-amber); }
+
+  .step {
+    margin-bottom: 24px;
+    position: relative;
+  }
+
+  .step-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .step-num {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--bg);
+    background: var(--accent);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text-bright);
+  }
+
+  .step-file {
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-left: auto;
+  }
+
+  .step-body {
+    margin-left: 34px;
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px 16px;
+  }
+
+  .flow-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .flow-row:last-child { margin-bottom: 0; }
+
+  .flow-from, .flow-to {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .flow-from.attacker, .flow-to.attacker { color: var(--kali-green); background: var(--green-dim); }
+  .flow-from.dc, .flow-to.dc { color: var(--dc-blue); background: rgba(88,136,216,0.10); }
+  .flow-from.ca, .flow-to.ca { color: var(--ca-amber); background: var(--amber-dim); }
+
+  .flow-arrow {
+    flex-shrink: 0;
+    font-size: 14px;
+    line-height: 1;
+  }
+  .flow-arrow.right { color: var(--arrow-red); }
+  .flow-arrow.left { color: var(--arrow-blue); }
+
+  .flow-desc {
+    color: var(--text);
+    flex: 1;
+    min-width: 0;
+  }
+
+  .flow-result {
+    font-size: 11px;
+    color: var(--text-dim);
+    background: var(--bg-panel);
+    padding: 2px 8px;
+    border-radius: 2px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: auto;
+  }
+
+  .chase-box {
+    margin-left: 34px;
+    border: 2px dashed var(--red);
+    border-radius: 4px;
+    padding: 16px;
+    background: var(--red-dim);
+    margin-bottom: 2px;
+  }
+
+  .chase-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 12px;
+  }
+
+  .sub-section {
+    margin-bottom: 14px;
+  }
+  .sub-section:last-child { margin-bottom: 0; }
+
+  .sub-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .rogue-servers {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .server-box {
+    font-size: 11px;
+    padding: 6px 12px;
+    border: 1px solid var(--kali-green);
+    border-radius: 3px;
+    color: var(--kali-green);
+    background: var(--green-dim);
+  }
+
+  .server-box span {
+    font-weight: 700;
+  }
+
+  .attr-block {
+    font-size: 12px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+  }
+
+  .attr-block .key { color: var(--cyan); }
+  .attr-block .val { color: var(--text); }
+  .cert-result {
+    font-size: 12px;
+    background: var(--bg-panel);
+    border: 1px solid var(--green);
+    border-radius: 3px;
+    padding: 8px 12px;
+  }
+
+  .cert-result .label { color: var(--text-dim); font-size: 11px; }
+  .cert-result .value { color: var(--green); font-weight: 600; }
+
+  .note-box {
+    margin-left: 34px;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--border-accent);
+    border-left: 3px solid var(--red);
+    border-radius: 0 4px 4px 0;
+    background: var(--bg-raised);
+  }
+
+  .note-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--red);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+
+  .note-text {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.6;
+  }
+
+  .note-text em {
+    color: var(--text-bright);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 4px 0 24px 34px;
+  }
+</style>
+
+<div class="header">
+  <h1>CVE-2026-54121: CertiGhost Attack Chain</h1>
+  <div class="subtitle">AD CS Chase Mechanism Abuse</div>
+</div>
+
+<div class="actors">
+  <div class="actor-chip attacker">Attacker (Kali)</div>
+  <div class="actor-chip dc">Domain Controller</div>
+  <div class="actor-chip ca">Certificate Authority</div>
+</div>
+
+<!-- Step 1 -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">1</span>
+    <span class="step-title">AD Discovery</span>
+    <span class="step-file">discovery.py</span>
+  </div>
+  <div class="step-body">
+    <div class="flow-row">
+      <span class="flow-from attacker">ATK</span>
+      <span class="flow-arrow right">&#x2192;</span>
+      <span class="flow-from dc">DC</span>
+      <span class="flow-desc">LDAP query: UAC=8192 (DC), pKIEnrollmentService</span>
+      <span class="flow-result">CA name + IP, DC FQDN, SID, GUID</span>
+    </div>
+  </div>
+</div>
+
+<!-- Step 2 -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">2</span>
+    <span class="step-title">Machine Account</span>
+    <span class="step-file">machine_account.py</span>
+  </div>
+  <div class="step-body">
+    <div class="flow-row">
+      <span class="flow-from attacker">ATK</span>
+      <span class="flow-arrow right">&#x2192;</span>
+      <span class="flow-from dc">DC</span>
+      <span class="flow-desc">addcomputer (MachineAccountQuota) &rarr; ATTACKER$</span>
+      <span class="flow-result">SID, password, NT hash</span>
+    </div>
+  </div>
+</div>
+
+<!-- Step 3 -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">3</span>
+    <span class="step-title">Chase Mechanism</span>
+    <span class="step-file">certificate.py + services.py</span>
+  </div>
+
+  <div class="chase-box">
+    <div class="chase-label">&#x26a0; Core exploit - the vulnerability</div>
+
+    <div class="sub-section">
+      <div class="sub-label">3a. Rogue servers started on attacker</div>
+      <div class="rogue-servers">
+        <div class="server-box"><span>SMB/LSA</span> :445</div>
+        <div class="server-box"><span>LDAP</span> :389</div>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label">3b. CSR submitted via MS-ICPR (RPC)</div>
+      <div class="attr-block">
+        <span class="key">CertificateTemplate:</span><span class="val">Machine</span><br>
+        <span class="key">cdc:</span><span class="val">attacker_ip</span> &larr; redirects CA verification<br>
+        <span class="key">rmd:</span><span class="val">DC01.cqure.lab</span> &larr; target to impersonate
+      </div>
+
+      <div class="flow-row">
+        <span class="flow-from attacker">ATK</span>
+        <span class="flow-arrow right">&#x2192;</span>
+        <span class="flow-from ca">CA</span>
+        <span class="flow-desc">CA reads <em>cdc</em> attribute, connects to attacker IP</span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label">3c. CA performs chase lookup</div>
+      <div class="flow-row">
+        <span class="flow-from ca">CA</span>
+        <span class="flow-arrow right">&#x2192;</span>
+        <span class="flow-from attacker">Rogue SMB</span>
+        <span class="flow-desc">"Is this domain trusted?" &rarr; "Yes"</span>
+      </div>
+      <div class="flow-row" style="margin-left: 20px;">
+        <span class="flow-result" style="margin-left:0; border: 1px solid var(--text-dim);">NLOracle validates via Netlogon to real DC</span>
+      </div>
+      <div class="flow-row">
+        <span class="flow-from ca">CA</span>
+        <span class="flow-arrow right">&#x2192;</span>
+        <span class="flow-from attacker">Rogue LDAP</span>
+        <span class="flow-desc">"Who is rmd?" &rarr; objectSid, sAMAccountName, dNSHostName of DC01</span>
+      </div>
+    </div>
+
+    <div class="sub-section">
+      <div class="sub-label">3d. Certificate issued with DC identity</div>
+      <div class="cert-result">
+        <span class="label">Subject:</span> <span class="value">CN=DC01.cqure.lab</span><br>
+        <span class="label">DNS:</span> <span class="value">DC01.cqure.lab</span> <span class="label">(from chase LDAP)</span><br>
+        <span class="label">SID:</span> <span class="value">S-1-5-21-...-1000</span>
+        <span class="label" style="margin-left: 8px;">(DC machine SID)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Step 4 -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">4</span>
+    <span class="step-title">PKINIT Authentication</span>
+    <span class="step-file">kerberos_auth.py (certipy-ad)</span>
+  </div>
+  <div class="step-body">
+    <div class="flow-row">
+      <span class="flow-from attacker">ATK</span>
+      <span class="flow-arrow right">&#x2192;</span>
+      <span class="flow-from dc">KDC</span>
+      <span class="flow-desc">KDC validates cert, issues TGT as DC01$</span>
+      <span class="flow-result">TGT &rarr; dc.ccache</span>
+    </div>
+  </div>
+</div>
+
+<!-- Step 5 -->
+<div class="step">
+  <div class="step-header">
+    <span class="step-num">5</span>
+    <span class="step-title">DCSync</span>
+    <span class="step-file">dcsync.py (secretsdump)</span>
+  </div>
+  <div class="step-body">
+    <div class="flow-row">
+      <span class="flow-from attacker">ATK</span>
+      <span class="flow-arrow right">&#x2192;</span>
+      <span class="flow-from dc">DC</span>
+      <span class="flow-desc">DRS replication with DC01$ TGT</span>
+      <span class="flow-result">krbtgt + all domain hashes</span>
+    </div>
+  </div>
+</div>
+
+<hr class="divider" style="margin-left: 0;">
+
+<div class="note-box" style="margin-left: 0;">
+  <div class="note-title">Independent of ESC1-ESC8</div>
+  <div class="note-text">
+    The CA uses the <em>Machine</em> template with "Build from Active Directory" policy.
+    Identity in the certificate comes entirely from the <em>chase LDAP lookup</em>
+    (step 3c). The attack works on <em>fully hardened</em> AD CS environments
+    (all classical ESC mitigations applied). The only effective mitigation is
+    disabling <em>EDITF_ENABLECHASECLIENTDC</em>.
+  </div>
+</div>

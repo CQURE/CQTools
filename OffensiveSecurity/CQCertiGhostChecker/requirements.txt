@@ -1,0 +1,8 @@
+impacket==0.13.1
+cryptography==42.0.8
+pyasn1==0.6.4
+asn1crypto==1.5.1
+pycryptodome==3.22.0
+dnspython==2.7.0
+ldap3==2.9.1
+certipy-ad==5.1.0

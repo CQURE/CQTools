@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pfx
+*.pem
+*.key
+*.ccache
+*.kirbi
+.env
+certighost_env/
+venv/
