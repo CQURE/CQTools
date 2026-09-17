@@ -51,10 +51,12 @@ from __future__ import annotations
 
 import argparse
 import csv
+import base64
 import datetime as dt
 import hashlib
 import html
 import json
+import os
 import re
 import sys
 from dataclasses import dataclass, field
@@ -1194,11 +1196,24 @@ def write_html_report(descs: List[Descriptor], path: str, host: str = "") -> Non
 
     e = html.escape
     generated = dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+    # The wordmark is inlined, so the report stays a single portable file that
+    # can be attached to a case without losing its branding.
+    logo_tag = ""
+    logo_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                             "assets", "cqure-logo.png")
+    try:
+        with open(logo_path, "rb") as fh:
+            logo_tag = ('<img class="logo" alt="CQURE" src="data:image/png;base64,%s">'
+                        % base64.b64encode(fh.read()).decode("ascii"))
+    except OSError:
+        logo_tag = '<div class="logo-text">CQURE</div>'
+
     parts: List[str] = []
     parts.append("""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CQSDDLAudit &middot; service report</title>
+<title>CQSDDLAudit service report</title>
 <style>
 :root{--accent:#EB5B27;--pink:#FF005C;--fg:#111;--fg2:#4A4744;--fg3:#7A7570;
       --line:#E7E3DF;--line2:#D2CCC5;--bg:#FFF;--soft:#F7F5F3;--inset:#F0EDEA;}
@@ -1207,10 +1222,18 @@ body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 "Segoe UI",sys
 .wrap{max-width:1280px;margin:0 auto;padding:40px}
 h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:0 0 6px}
 h2{font-size:21px;letter-spacing:-.01em;margin:38px 0 12px}
+.head{display:flex;align-items:center;gap:18px;margin-bottom:26px}
+.logo{height:34px;width:auto;display:block}
+.logo-text{font:600 24px/1 "Segoe UI",system-ui,sans-serif;letter-spacing:-.01em}
 .eyebrow{font:500 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;
-         text-transform:uppercase;color:var(--fg3);margin-bottom:10px}
-.meta{color:var(--fg2);font-size:13px;margin-bottom:28px}
+         text-transform:uppercase;color:var(--fg3);padding-left:18px;
+         border-left:1px solid var(--line2)}
 .rule{height:4px;width:120px;background:linear-gradient(90deg,var(--accent),var(--pink));margin:14px 0 24px}
+dl.meta{display:flex;flex-wrap:wrap;gap:10px 40px;margin:0 0 30px;padding:0}
+dl.meta div{display:flex;flex-direction:column;gap:3px}
+dl.meta dt{font:500 10.5px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;
+           text-transform:uppercase;color:var(--fg3)}
+dl.meta dd{margin:0;font-size:14px;color:var(--fg)}
 .tiles{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
 .tile{border:1px solid var(--line);border-radius:6px;padding:14px 18px;min-width:150px;background:var(--soft)}
 .tile .n{font-size:30px;font-weight:600;line-height:1.1}
@@ -1238,14 +1261,21 @@ code,.sddl{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;word-bre
 .allow{color:var(--fg)}
 footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
        color:var(--fg3);font-size:12.5px}
+footer p{margin:0 0 8px;max-width:78ch}
+footer p:last-child{margin-bottom:0}
 @media print{.wrap{padding:0}tr:hover td{background:none}}
 </style></head><body><div class="wrap">""")
 
-    parts.append('<div class="eyebrow">CQURE &middot; CQSDDLAudit</div>')
+    parts.append('<header class="head">%s<div class="eyebrow">CQSDDLAudit</div></header>'
+                 % logo_tag)
     parts.append("<h1>Service security descriptor report</h1>")
     parts.append('<div class="rule"></div>')
-    parts.append('<div class="meta">%s services examined%s &middot; generated %s</div>'
-                 % (len(descs), (" &middot; host " + e(host)) if host else "", e(generated)))
+    parts.append('<dl class="meta">')
+    if host:
+        parts.append("<div><dt>Host</dt><dd>%s</dd></div>" % e(host))
+    parts.append("<div><dt>Services examined</dt><dd>%d</dd></div>" % len(descs))
+    parts.append("<div><dt>Generated</dt><dd>%s</dd></div>" % e(generated))
+    parts.append("</dl>")
 
     parts.append('<div class="tiles">')
     for key, cls in (("HIDDEN", "hidden"), ("WEAK", "weak"),
@@ -1294,11 +1324,12 @@ footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
         parts.append("</tr>")
     parts.append("</tbody></table>")
 
-    parts.append("<footer>CQSDDLAudit &middot; Paula Januszkiewicz | CQURE &middot; "
-                 "Apache License 2.0.<br>"
-                 "HIDDEN means the descriptor denies SERVICE_QUERY_STATUS to a principal that "
-                 "should be able to list the service, or the service exists in the registry "
-                 "while SCM enumeration did not return it.</footer>")
+    parts.append("<footer>"
+                 "<p><strong>HIDDEN</strong> means the descriptor denies SERVICE_QUERY_STATUS "
+                 "to a principal that should be able to list the service, or the service exists "
+                 "in the registry while SCM enumeration did not return it.</p>"
+                 "<p>CQSDDLAudit, Paula Januszkiewicz, CQURE. Apache License 2.0.</p>"
+                 "</footer>")
     parts.append("</div></body></html>")
 
     with open(path, "w", encoding="utf-8") as fh:
