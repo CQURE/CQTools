@@ -4,7 +4,7 @@
 
 It reuses the parsers from `CQUSNDeepAnalyzer`, so the binary formats, path reconstruction and FRN conventions live in exactly one place.
 
-**CQURE / Paula Januszkiewicz · Apache License 2.0**
+**CQURE / Paula Januszkiewicz - Apache License 2.0**
 
 ## Inputs
 
