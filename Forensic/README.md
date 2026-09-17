@@ -60,3 +60,14 @@ CQUSNDeepAnalyzer – single-file pure-Python CLI (stdlib + Plotly) that parses 
 ### Change Log
 New Tools:
 CQUSNDeepAnalyzer – deep USN Journal / MFT / EVTX analyzer with behavioral detectors and interactive reporting
+
+## CQUSNCorrelate
+Companion to CQUSNDeepAnalyzer. Where the analyzer builds a full report, CQUSNCorrelate answers one question at a time from the command line, which is what an analyst does first.
+
+1. `exec-evidence` - a binary was created here AND its Prefetch was created, so it was dropped and then actually ran
+2. `lifecycle` - files created and later deleted, shortest-lived first, which surfaces staging and clean-up
+3. `sessions` - file creations attributed to the logon sessions that were open at that moment
+4. `metadata-changed` - timestamps, attributes or ACLs changed with no content write nearby
+5. `si-vs-fn` - `$STANDARD_INFORMATION` (0x10) against `$FILE_NAME` (0x30) in the `$MFT`, the timestomp check
+
+The last two are a pair: one finds the footprint in the journal, the other confirms it in the MFT. Reuses the CQUSNDeepAnalyzer parsers and ships with a synthetic demo dataset, so every correlation has something to find. See [CQUSNCorrelate](CQUSNCorrelate).

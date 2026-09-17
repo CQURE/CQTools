@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# analyst output, not source
+*.csv
+*.json
+*.html
+!samples/demo_evtx.csv
+report*.html
+out/

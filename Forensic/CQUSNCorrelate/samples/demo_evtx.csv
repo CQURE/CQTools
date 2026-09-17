@@ -1,0 +1,14 @@
+TimeCreated,EventId,Provider,Channel,UserName,ExecutableInfo,Payload,SourceFile
+2026-03-17T08:40:00+00:00,4624,Microsoft-Windows-Security-Auditing,Security,CORP\svc_backup,,"{'TargetUserName':'svc_backup','TargetDomainName':'CORP','TargetLogonId':'0x2f1a','LogonType':'5','IpAddress':'-','WorkstationName':'WKS-041'}",Security.evtx
+2026-03-17T09:02:00+00:00,4624,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe,,"{'TargetUserName':'jdoe','TargetDomainName':'CORP','TargetLogonId':'0x4c7b','LogonType':'2','IpAddress':'-','WorkstationName':'WKS-041'}",Security.evtx
+2026-03-17T09:05:00+00:00,4634,Microsoft-Windows-Security-Auditing,Security,CORP\svc_backup,,"{'TargetUserName':'svc_backup','TargetDomainName':'CORP','TargetLogonId':'0x2f1a'}",Security.evtx
+2026-03-17T10:01:20+00:00,4688,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe,winword.exe,"Process Create: C:\Program Files\Microsoft Office\WINWORD.EXE",Security.evtx
+2026-03-17T10:04:10+00:00,4688,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe,svchost32.exe,"Process Create: C:\Users\jdoe\AppData\Local\Temp\svchost32.exe",Security.evtx
+2026-03-17T10:12:00+00:00,4624,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"{'TargetUserName':'jdoe_adm','TargetDomainName':'CORP','TargetLogonId':'0x6e29','LogonType':'10','IpAddress':'10.10.7.66','WorkstationName':'WKS-041'}",Security.evtx
+2026-03-17T10:16:40+00:00,4688,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,powershell.exe,"Process Create: powershell.exe -nop -w hidden -enc SQBFAFgA",Security.evtx
+2026-03-17T11:05:00+00:00,4720,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"A user account was created. TargetUserName: svc_update",Security.evtx
+2026-03-17T11:05:12+00:00,4732,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"A member was added to a security-enabled local group. Group: Administrators",Security.evtx
+2026-03-17T11:05:35+00:00,4698,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"A scheduled task was created: \UpdateHealthCheck",Security.evtx
+2026-03-17T11:06:05+00:00,7045,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"A service was installed: UpdateHealthCheck, ImagePath: C:\Users\jdoe\AppData\Local\Temp\svchost32.exe",Security.evtx
+2026-03-17T11:31:00+00:00,1102,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe_adm,,"The audit log was cleared",Security.evtx
+2026-03-17T17:30:00+00:00,4634,Microsoft-Windows-Security-Auditing,Security,CORP\jdoe,,"{'TargetUserName':'jdoe','TargetDomainName':'CORP','TargetLogonId':'0x4c7b'}",Security.evtx
