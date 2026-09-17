@@ -71,3 +71,20 @@ Companion to CQUSNDeepAnalyzer. Where the analyzer builds a full report, CQUSNCo
 5. `si-vs-fn` - `$STANDARD_INFORMATION` (0x10) against `$FILE_NAME` (0x30) in the `$MFT`, the timestomp check
 
 The last two are a pair: one finds the footprint in the journal, the other confirms it in the MFT. Reuses the CQUSNDeepAnalyzer parsers and ships with a synthetic demo dataset, so every correlation has something to find. See [CQUSNCorrelate](CQUSNCorrelate).
+
+## CQSDDLAudit
+A security descriptor report for every service on the system, including the ones that have hidden themselves. SDDL is the only way to see service permissions at all: the Security tab has no page for them, and `sc.exe sdshow` returns a string with no interpretation.
+
+A service can also hide from you. Denying `SERVICE_QUERY_STATUS` (`LC`) removes it from enumeration, so `sc query`, `services.msc` and `Get-Service` all report a machine that does not have it, while the service keeps running. The usual form is a Deny of `DCLC`, often `DCLCWPDTSD`, aimed at Interactive, Service and Administrators at once, which also blocks stopping, reconfiguring and deleting it. It is a Deny ACE, not a rootkit, and it needs no driver and no code.
+
+So the collector does not ask the SCM. It enumerates `HKLM\SYSTEM\CurrentControlSet\Services` and reads each `Security` value directly, which means a service that denies its own enumeration still appears, and the gap between the registry list and the SCM list is itself a finding.
+
+1. `services` - the report: every service interpreted, hidden ones called out with a warning naming the ACE responsible
+2. `decode` - one descriptor, every ACE in real order, with a canonical-order verdict
+3. `order` - non-canonical DACLs, where access is decided by position and the GUI misrepresents it
+4. `generic` - entries carrying `GA`/`GR`/`GW`/`GX`, which the Security tab cannot render at all
+5. `risk` - pattern findings with severity across a whole collection
+6. `access` - access-check simulator: could this principal do this, and which ACE decided
+7. `diff` - drift against a baseline, order aware
+
+Known false positives are excluded by design rather than left for the reader to filter: drivers, per-user service templates, Administrators holding `WRITE_DAC`, a service holding rights over its own descriptor, Interactive holding start or stop, denying Guests, and inherit-only generic rights on a service, which are inert because a service has no child objects. Ships with a synthetic sample collection so every finding has something to find. See [CQSDDLAudit](CQSDDLAudit).

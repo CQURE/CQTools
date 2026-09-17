@@ -1,0 +1,13 @@
+# Collected descriptors and generated reports are host specific. They are
+# evidence from whichever machine was audited, not part of the tool.
+services-sddl.csv
+services.csv
+baseline.csv
+golden.csv
+risk.csv
+report.html
+demo-report.html
+*.bak
+
+__pycache__/
+*.py[cod]

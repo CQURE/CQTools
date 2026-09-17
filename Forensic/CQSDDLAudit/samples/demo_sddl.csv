@@ -1,0 +1,10 @@
+Source,ObjectType,Sddl,DisplayName,Account,StartMode,ServiceType,ImagePath,EnumVisible,SdSource,Notes
+Spooler,service,"O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)",Print Spooler,LocalSystem,Automatic,0x110,C:\Windows\System32\spoolsv.exe,True,registry,
+W32Time,service,"O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)(A;;CCLCSWLOCRRC;;;IU)(A;;CCLCSWLOCRRC;;;SU)",Windows Time,LocalService,Manual,0x20,C:\Windows\System32\svchost.exe -k LocalService,True,registry,
+CQHiddenService,service,"O:SYG:SYD:(D;;DCLCWPDTSD;;;IU)(D;;DCLCWPDTSD;;;SU)(D;;DCLCWPDTSD;;;BA)(A;;CCLCSWRPWPDTLOCRRC;;;SY)",CQ Hidden Service,LocalSystem,Automatic,0x10,C:\ProgramData\cq\cqhidden.exe,False,registry,
+TelemetrySink,service,"O:SYG:SYD:(D;;GA;;;BA)(A;;CCLCSWRPWPDTLOCRRC;;;SY)",Telemetry Sink,LocalSystem,Automatic,0x10,C:\Users\Public\tsink.exe,False,registry,
+LegacyAgent,service,"O:SYG:SYD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BU)(A;;CCLCSWRPWPDTLOCRRC;;;SY)",Legacy Agent,LocalSystem,Automatic,0x10,C:\Agent\agent.exe,True,registry,
+OpenSvc,service,O:SYG:SYD:,Wide Open Service,LocalSystem,Manual,0x10,C:\Tools\open.exe,True,registry,no Security value in the registry
+BackupHelper,service,"O:SYG:SYD:(D;;WPSD;;;BA)(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCLCSWLOCRRC;;;IU)",Backup Helper,LocalSystem,Automatic,0x10,C:\Program Files\bk\helper.exe,True,registry,
+NetTap,service,"O:SYG:SYD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;WD)(A;;CCLCSWRPWPDTLOCRRC;;;SY)",Net Tap,LocalSystem,Manual,0x10,C:\Windows\Temp\nettap.exe,True,sc sdshow,
+DriverFoo,service,"O:SYG:SYD:(A;;CCLCSWRPWPDTLOCRRC;;;SY)(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;BA)",Foo Filter Driver,,System,0x1,\SystemRoot\System32\drivers\foo.sys,n/a (driver),registry,
