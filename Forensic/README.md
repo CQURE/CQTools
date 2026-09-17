@@ -88,3 +88,21 @@ So the collector does not ask the SCM. It enumerates `HKLM\SYSTEM\CurrentControl
 7. `diff` - drift against a baseline, order aware
 
 Known false positives are excluded by design rather than left for the reader to filter: drivers, per-user service templates, Administrators holding `WRITE_DAC`, a service holding rights over its own descriptor, Interactive holding start or stop, denying Guests, and inherit-only generic rights on a service, which are inert because a service has no child objects. Ships with a synthetic sample collection so every finding has something to find. See [CQSDDLAudit](CQSDDLAudit).
+
+## CQEVTXExtractor
+A native Windows Event Log (`.evtx`) reader in pure Python, standard library only. No EvtxECmd, no .NET, nothing to install on the evidence machine.
+
+Event logs are not XML on disk. A `.evtx` file is a 4 KiB header followed by 64 KiB chunks, and each chunk holds records in Binary XML: a token stream with a per chunk template table, so the repeated skeleton of an event is stored once and every record after it carries only the values that differ. Reading the file means implementing that format, not parsing text.
+
+It also reads the file rather than asking the service. `Get-WinEvent` and `wevtutil` hand the log to the Event Log service to render, so they need a running service and they hide what the container says about itself. This reads the bytes, which works on a log pulled off a dead disk, and reports the dirty flag and all three CRC32 checksums instead of quietly skipping them.
+
+1. `info` - header, chunk map, and every CRC32 the format carries, with the dirty and full flags
+2. `dump` - records filtered by event ID, provider, channel, level, user, time window, substring or regex, as a table, XML, CSV or JSON
+3. `stats` - event ID histogram by provider, plus level and computer breakdowns and volume by hour
+4. `evtxecmd` - an EvtxECmd compatible CSV, so `CQUSNCorrelate sessions` runs without the .NET tool
+
+Two things it deliberately does not trust. The header's chunk count, because a log that was not closed cleanly routinely has more chunks on disk than the header admits to, and those trailing chunks hold the newest events; chunks are found by scanning and the discrepancy is reported. And a CRC mismatch as proof of tampering, because in the last chunk of a dirty log it is expected, while anywhere else it means the bytes no longer match what the service wrote.
+
+Decoding is checked against Windows itself: every record of Application, System, Security, Windows PowerShell, WinRM/Operational and PowerShell/Operational, 91,549 records in total, rendered by `Get-WinEvent` and compared field by field and payload item by payload item in document order. Every System field, every `EventData` item, every timestamp to 100 nanoseconds.
+
+Ships with `samples/demo_Security.evtx`, a real .evtx file written by `make_demo_data.py` in the actual binary format, templates and checksums included, which Windows opens in Event Viewer. It retells the same intrusion as the CQUSNCorrelate demo data on the same host and clock, so the two tools demonstrate together. See [CQEVTXExtractor](CQEVTXExtractor).

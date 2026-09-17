@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# analyst output and evidence, not source
+*.csv
+*.json
+*.xml
+!samples/
+out/
+
+# never commit a real event log
+Security.evtx
+*.evtx
+!samples/demo_Security.evtx
