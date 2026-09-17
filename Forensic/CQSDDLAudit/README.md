@@ -99,9 +99,17 @@ readable subset with long cells clipped; the files carry every field.
 | Verdict | Meaning |
 |---|---|
 | `HIDDEN` | Denies `SERVICE_QUERY_STATUS` to a principal that should be able to list it, or exists in the registry while SCM enumeration did not return it |
-| `WEAK` | NULL DACL, or a broad principal holds `SERVICE_CHANGE_CONFIG`, `WRITE_DAC`, `WRITE_OWNER`, or start and stop as Everyone |
+| `WEAK` | NULL DACL, or a broad principal holds `SERVICE_CHANGE_CONFIG`, `WRITE_DAC`, `WRITE_OWNER` or `SERVICE_STOP` |
 | `ANTI-TAMPER` | Denies stop, reconfigure, delete or repair to a principal that legitimately administers services |
+| `VERIFY` | Everyone can start the service but not stop it. Worth confirming, not worth calling weak |
 | `ok` | Nothing matched |
+
+`VERIFY` exists because start without stop is a much weaker primitive than
+start with stop. It cannot be used to take protection down, and a good number of
+on-demand services are meant to be startable by anyone. Confirm it against what
+the service is for, rather than treating it as a finding. On a stock Windows 11
+install this is the entire result: no hidden services, no weak ones, and roughly
+nine services that Everyone may start.
 
 `HIDDEN` gets its own warning block on the console: the ACE responsible, the
 principal it targets, what that principal can no longer do, and what to run

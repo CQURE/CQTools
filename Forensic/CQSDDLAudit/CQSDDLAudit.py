@@ -788,7 +788,8 @@ class ServiceVerdict:
     hidden: bool = False                 # denies enumeration to someone who should see it
     not_enumerated: bool = False         # the collector could not see it through the SCM
     anti_tamper: bool = False            # denies stop, delete, reconfigure or repair
-    weak: bool = False                   # grants control to a broad principal
+    weak: bool = False                   # grants real control to a broad principal
+    verify: bool = False                 # grants something worth confirming, not control
     null_dacl: bool = False
     reasons: List[str] = field(default_factory=list)
 
@@ -800,6 +801,8 @@ class ServiceVerdict:
             return "WEAK"
         if self.anti_tamper:
             return "ANTI-TAMPER"
+        if self.verify:
+            return "VERIFY"
         return "ok"
 
 
@@ -841,12 +844,22 @@ def analyse_service(desc: Descriptor) -> ServiceVerdict:
                 v.weak = True
                 v.reasons.append("Allow to %s includes WRITE_DAC or WRITE_OWNER, so the "
                                  "descriptor can be rewritten" % resolve_sid(ace.sid))
-            elif ace.mask & (SVC_START | SVC_STOP) and ace.sid.upper() in UNRESTRICTED_PRINCIPALS:
+            elif ace.mask & SVC_STOP and ace.sid.upper() in UNRESTRICTED_PRINCIPALS:
                 # Interactive and Authenticated Users holding start or stop is
                 # ordinary Windows configuration on a large number of services.
                 # Everyone and Anonymous holding it is not.
                 v.weak = True
-                v.reasons.append("Allow to %s includes start or stop" % resolve_sid(ace.sid))
+                v.reasons.append("Allow to %s includes SERVICE_STOP, so anyone can take this "
+                                 "service down" % resolve_sid(ace.sid))
+            elif ace.mask & SVC_START and ace.sid.upper() in UNRESTRICTED_PRINCIPALS:
+                # Start without stop is a much weaker primitive: it cannot be
+                # used to disable protection, and plenty of on-demand services
+                # are meant to be startable by anyone. Worth confirming against
+                # the intent of the service, not worth calling weak.
+                v.verify = True
+                v.reasons.append("Allow to %s includes SERVICE_START but not SERVICE_STOP, "
+                                 "confirm the service is meant to be startable on demand"
+                                 % resolve_sid(ace.sid))
 
     return v
 
@@ -923,10 +936,15 @@ def find_risks(desc: Descriptor) -> List[Finding]:
                 add("critical", "service-change-config",
                     "SERVICE_CHANGE_CONFIG granted to %s: the binary path can be replaced, "
                     "which is arbitrary code as the service account" % label, ace)
-            elif ace.mask & (SVC_START | SVC_STOP):
+            elif ace.mask & SVC_STOP:
                 sev = "medium" if ace.sid.upper() in UNRESTRICTED_PRINCIPALS else "low"
-                add(sev, "service-start-stop",
-                    "service start or stop granted to %s" % label, ace)
+                add(sev, "service-stop",
+                    "SERVICE_STOP granted to %s, the service can be taken down" % label, ace)
+            elif ace.mask & SVC_START:
+                sev = "low" if ace.sid.upper() in UNRESTRICTED_PRINCIPALS else "info"
+                add(sev, "service-start-only",
+                    "SERVICE_START granted to %s without SERVICE_STOP, confirm the service "
+                    "is meant to be startable on demand" % label, ace)
 
         if ot == "service" and ace.is_deny:
             effects = service_deny_effects(ace)
@@ -1060,7 +1078,7 @@ def write_outputs(rows: List[Dict[str, object]], args: argparse.Namespace) -> No
 # Subcommands
 # --------------------------------------------------------------------------
 
-VERDICT_ORDER = {"HIDDEN": 0, "WEAK": 1, "ANTI-TAMPER": 2, "ok": 3}
+VERDICT_ORDER = {"HIDDEN": 0, "WEAK": 1, "ANTI-TAMPER": 2, "VERIFY": 3, "ok": 4}
 
 
 def print_hidden_warnings(pairs: List[Tuple[Descriptor, "ServiceVerdict"]],
@@ -1215,19 +1233,30 @@ def write_html_report(descs: List[Descriptor], path: str, host: str = "") -> Non
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>CQSDDLAudit service report</title>
 <style>
+/* CQURE Design System, corporate surface. Tokens from colors_and_type.css.
+   Space Grotesk is the brand primary with Segoe UI as the documented system
+   fallback, and no webfont is fetched: a forensic report has to render the
+   same offline, on an examiner box, years from now. */
 :root{--accent:#EB5B27;--pink:#FF005C;--fg:#111;--fg2:#4A4744;--fg3:#7A7570;
-      --line:#E7E3DF;--line2:#D2CCC5;--bg:#FFF;--soft:#F7F5F3;--inset:#F0EDEA;}
+      --line:#E7E3DF;--line2:#D2CCC5;--bg:#FFF;--soft:#F7F5F3;--inset:#F0EDEA;
+      --sans:"Space Grotesk","Segoe UI",system-ui,-apple-system,sans-serif;
+      --mono:ui-monospace,"JetBrains Mono",Consolas,monospace;
+      --r-sm:4px;--r-lg:10px;--track-caps:.12em;}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 "Segoe UI",system-ui,sans-serif}
-.wrap{max-width:1280px;margin:0 auto;padding:40px}
-h1{font-size:34px;line-height:1.1;letter-spacing:-.02em;margin:0 0 6px}
-h2{font-size:21px;letter-spacing:-.01em;margin:38px 0 12px}
-.head{display:flex;align-items:center;gap:18px;margin-bottom:26px}
-.logo{height:34px;width:auto;display:block}
-.logo-text{font:600 24px/1 "Segoe UI",system-ui,sans-serif;letter-spacing:-.01em}
-.eyebrow{font:500 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;
-         text-transform:uppercase;color:var(--fg3);padding-left:18px;
-         border-left:1px solid var(--line2)}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.55 var(--sans)}
+.wrap{max-width:1440px;margin:0 auto;padding:40px}
+h1{font-size:clamp(28px,3.2vw,40px);font-weight:600;line-height:1.15;
+   letter-spacing:-.02em;margin:0 0 6px;text-wrap:balance}
+h2{font-size:24px;font-weight:600;letter-spacing:-.02em;margin:38px 0 12px}
+/* Wordmark plus a slash qualifier, the brand's own lockup for naming a
+   product beside the mark. Slashes carry hierarchy in this system; the
+   middot is not used as a separator. */
+.head{display:flex;align-items:baseline;gap:14px;margin-bottom:26px}
+.logo{height:30px;width:auto;display:block;align-self:center}
+.logo-text{font:600 24px/1 var(--sans);letter-spacing:-.01em}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:var(--track-caps);
+         text-transform:uppercase;color:var(--fg3);align-self:center}
+.eyebrow .sl{color:var(--accent);margin-right:6px}
 .rule{height:4px;width:120px;background:linear-gradient(90deg,var(--accent),var(--pink));margin:14px 0 24px}
 dl.meta{display:flex;flex-wrap:wrap;gap:10px 40px;margin:0 0 30px;padding:0}
 dl.meta div{display:flex;flex-direction:column;gap:3px}
@@ -1235,24 +1264,27 @@ dl.meta dt{font:500 10.5px/1 ui-monospace,Consolas,monospace;letter-spacing:.12e
            text-transform:uppercase;color:var(--fg3)}
 dl.meta dd{margin:0;font-size:14px;color:var(--fg)}
 .tiles{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:8px}
-.tile{border:1px solid var(--line);border-radius:6px;padding:14px 18px;min-width:150px;background:var(--soft)}
-.tile .n{font-size:30px;font-weight:600;line-height:1.1}
-.tile .l{font:500 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.12em;
+.tile{border:1px solid var(--line);border-radius:var(--r-lg);padding:14px 18px;
+      min-width:150px;background:var(--soft)}
+.tile .n{font-size:30px;font-weight:600;line-height:1.1;font-variant-numeric:tabular-nums}
+.tile .l{font:500 11px/1 var(--mono);letter-spacing:var(--track-caps);
          text-transform:uppercase;color:var(--fg3);margin-top:6px}
 .tile.hidden{border-color:var(--pink)} .tile.hidden .n{color:var(--pink)}
 .tile.weak{border-color:var(--accent)} .tile.weak .n{color:var(--accent)}
+.tile.verify{border-color:var(--line2)} .tile.verify .n{color:var(--fg2)}
 table{border-collapse:collapse;width:100%;font-size:13.5px}
-th{text-align:left;font:500 11px/1.4 ui-monospace,Consolas,monospace;letter-spacing:.1em;
+th{text-align:left;font:500 11px/1.4 var(--mono);letter-spacing:.1em;
    text-transform:uppercase;color:var(--fg3);border-bottom:1px solid var(--line2);padding:8px 10px}
 td{border-bottom:1px solid var(--line);padding:8px 10px;vertical-align:top}
 tr:hover td{background:var(--soft)}
-.v{font:600 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;padding:4px 7px;
-   border-radius:3px;display:inline-block;white-space:nowrap}
+.v{font:600 11px/1 var(--mono);letter-spacing:.08em;padding:4px 7px;
+   border-radius:var(--r-sm);display:inline-block;white-space:nowrap}
 .v.HIDDEN{background:var(--pink);color:#fff}
 .v.WEAK{background:var(--accent);color:#fff}
 .v[class*="ANTI"]{background:#B45309;color:#fff}
+.v.VERIFY{background:var(--bg);color:var(--fg2);box-shadow:inset 0 0 0 1px var(--line2)}
 .v.ok{background:var(--inset);color:var(--fg3)}
-code,.sddl{font-family:ui-monospace,Consolas,monospace;font-size:12.5px;word-break:break-all}
+code,.sddl{font-family:var(--mono);font-size:12.5px;word-break:break-all}
 .sddl{display:block;background:var(--inset);border-left:3px solid var(--accent);
       padding:8px 10px;margin-top:6px;border-radius:0 3px 3px 0}
 .reason{color:var(--fg2);font-size:13px;margin:3px 0}
@@ -1266,8 +1298,9 @@ footer p:last-child{margin-bottom:0}
 @media print{.wrap{padding:0}tr:hover td{background:none}}
 </style></head><body><div class="wrap">""")
 
-    parts.append('<header class="head">%s<div class="eyebrow">CQSDDLAudit</div></header>'
-                 % logo_tag)
+    parts.append('<header class="head">%s'
+                 '<div class="eyebrow"><span class="sl">/</span>CQSDDLAudit</div>'
+                 '</header>' % logo_tag)
     parts.append("<h1>Service security descriptor report</h1>")
     parts.append('<div class="rule"></div>')
     parts.append('<dl class="meta">')
@@ -1279,7 +1312,7 @@ footer p:last-child{margin-bottom:0}
 
     parts.append('<div class="tiles">')
     for key, cls in (("HIDDEN", "hidden"), ("WEAK", "weak"),
-                     ("ANTI-TAMPER", "weak"), ("ok", "")):
+                     ("ANTI-TAMPER", "weak"), ("VERIFY", "verify"), ("ok", "")):
         parts.append('<div class="tile %s"><div class="n">%d</div><div class="l">%s</div></div>'
                      % (cls, counts.get(key, 0), e(key)))
     parts.append("</div>")
